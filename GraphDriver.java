@@ -20,21 +20,8 @@ public class GraphDriver	{
 			Comparable one = ((GraphNode)path.get ( x )).getKey();
 			Comparable two = ((GraphNode)path.get ( x + 1 )).getKey();
 			String movie = mygraph.getMovie ( one, two );
-			System.out.println ( one.toString() + " starred with " + two.toString() + " in the movie " + movie );
-		}
-	}
-	
-	/**
-	 * Prints a path of actors from an ArrayList.
-	 * @param path An ArrayList returned from shortestPath or the like.
-	 */
-	private static void printPathToo ( ArrayList path )	{
-		for ( int x = 0; x < path.size() - 1; x++ )	{
-			System.out.print ( ((GraphNode)path.get ( x )).getKey() );
-			if ( x != path.size() - 2 )
-				System.out.print ( ", " );
-			else
-				System.out.println();
+			if ( !movie.equals ( "(0)" ) )
+				System.out.println ( "'" + one.toString() + "' starred with '" + two.toString() + "' in the movie '" + movie + "'" );
 		}
 	}
 	
@@ -163,7 +150,7 @@ public class GraphDriver	{
 				}
 				//put in real bfs here for two states
 				ArrayList path = mygraph.bfs ( actors[0].trim(), actors[1].trim() );
-				printPathToo ( path );
+				printPath ( path );
 			}
 			else if ( command.equals ( "add" ) )	{
 				System.out.print ( "read from file> " );
