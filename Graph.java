@@ -66,6 +66,18 @@ public class Graph	{
 	}
 	
 	/**
+	 * Determines if this graph is a connected graph or not.
+	 * @return boolean determining if this is connected.
+	 */
+	public boolean isConnected()	{
+		for ( int x = 0; x < size; x++ )	{
+			ArrayList t = bft ( getVertex ( x ).getKey() );
+			if ( t.size() != size )	return false;
+		}
+		return true;
+	}
+	
+	/**
 	 * Convienence method for determining the number of vertecies in the graph.
 	 * @return int of the size of the graph.pat
 	 */
@@ -333,18 +345,17 @@ public class Graph	{
 	public ArrayList bft ( Comparable searchKey )	{
 		GraphNode temp;
 		ArrayList searchList = new ArrayList();
-		QueueReferenceBased bfsQueue = new QueueReferenceBased();
-		bfsQueue.enqueue ( vertexList.get ( findIndex ( searchKey ) ) );
+		ArrayList bfsQueue = new ArrayList ( size );
+		bfsQueue.add ( bfsQueue.size(), vertexList.get ( findIndex ( searchKey ) ) );
 		getVertex ( searchKey ).setMarked ( true );
 		searchList.add ( getVertex ( searchKey ) );
 
 		while ( !bfsQueue.isEmpty() )	{
-			temp = (GraphNode)bfsQueue.dequeue();
-
+			temp = (GraphNode)bfsQueue.remove ( 0 );
 			for ( int g = 0; g < size; g++ )	{
 				if ( adjacent[findIndex ( temp.getKey() )][g] != Double.POSITIVE_INFINITY && !getVertex ( g ).isMarked() )	{
 					((GraphNode)vertexList.get ( g )).setMarked ( true );
-					bfsQueue.enqueue ( vertexList.get ( g ) );
+					bfsQueue.add ( bfsQueue.size(), vertexList.get ( g ) );
 					searchList.add ( getVertex ( g ) );
 				}
 			}
@@ -358,22 +369,27 @@ public class Graph	{
 	 * @return int representing the diameter of the graph.
 	 */
 	public double diameter()	{
+		// early check... can make it take a really long time
+		if ( !isConnected() )	return Double.POSITIVE_INFINITY;
+		System.out.println ( "Graph is connected." );
 		double mins[] = new double[size];
+		// find all shortest paths and determine the maximum of each
 		for ( int x = 0; x < size; x++ )	{
-			mins[x] = 0;
-			ArrayList t = bft ( getVertex ( x ).getKey() );
-			if ( t.size() != size )	return Double.POSITIVE_INFINITY;
-			for ( int y = 1; y < t.size(); y++ )	{
-				mins[x] += getWeight ( ((GraphNode) t.get ( y - 1 )).getKey(), ((GraphNode) t.get ( y )).getKey() );
+			mins[x] = 0.0;
+			Comparable key = getVertex ( x ).getKey();
+			for ( int y = 0; y < size; y++ )	{
+				if ( x == y )	continue;
+				ArrayList path = shortestPath ( key, getVertex ( y ).getKey() );
+				if ( path.size() > mins[x] )	mins[x] = path.size();
 			}
 		}
-		
-		double minsize = mins[0];
+		// find the minimum of the paths
+		double max = mins[0];
 		for ( int x = 0; x < size; x++ )	{
-			if ( minsize > mins[x] )
-				minsize = mins[x];
+			if ( mins[x] > max )	max = mins[x];
 		}
-		return minsize;
+		// return num edges between them, not number of nodes
+		return max - 1;
 	}
 	
 	/**
@@ -395,7 +411,7 @@ public class Graph	{
 		}
 		else	{
 			ArrayList q = new ArrayList ( x );
-			for ( int y = 0; y < x; y++ )
+			for ( int y = 0; y <= x; y++ )
 				q.add ( p.get ( x ) );
 			p = q;
 		}
@@ -473,6 +489,7 @@ public class Graph	{
 					smallest = j;
 					smallestweight = weight[j];
 				}
+			//if ( smallest == -1 )	continue;
 			/* mark smallest vertex */
 			GraphNode smallnode = (GraphNode)vertexList.get ( smallest );
 			smallnode.setMarked ( true );
@@ -501,6 +518,9 @@ public class Graph	{
 		}
 		/* gotta add the first one */
 		result.add ( getVertex ( firstkey ) );
+		
+		/* unmark everything */
+		clearMarks();
 		
 		/* reverse the arraylist */
 		path.clear();

@@ -52,7 +52,9 @@ public class GraphDriver	{
 				
 				//get all the actors in a usable form
 				line = read.readLine();
-				while ( !line.equals ( "" ) )	{
+				// NEW
+				// added check for read.ready() : no longer must have two lines ending input file
+				while ( read.ready() && !line.equals ( "" ) )	{
 					actors.add ( line );
 					line = read.readLine();
 				}
@@ -113,9 +115,8 @@ public class GraphDriver	{
 				command = in.readLine().trim();
 			}
 			catch ( IOException exception )	{
-				System.out.println ( "bailing from:" );
+				System.out.println ( "bailing from command:" );
 				exception.printStackTrace();
-				break;
 			}
 			if ( command.equals( "path" ) )	{
 				System.out.print ( "actors (one,two)> " );
@@ -124,15 +125,16 @@ public class GraphDriver	{
 					actors = (String [])in.readLine().trim().split ( "," );
 				}
 				catch ( IOException exception )	{
-					System.out.println ( "bailing from:" );
+					System.out.println ( "bailing from path:" );
 					exception.printStackTrace();
-					break;
 				}
 				if ( actors.length != 2 )	{
 					System.out.println ( "Enter two actors only!" );
 				}
-				ArrayList path = mygraph.shortestPath ( actors[0].trim(), actors[1].trim() );
-				printPath ( path );
+				else	{
+					ArrayList path = mygraph.shortestPath ( actors[0].trim(), actors[1].trim() );
+					printPath ( path );
+				}
 			}
 			else if ( command.equals( "bfs" ) )	{
 				System.out.print ( "actors (one,two)> " );
@@ -141,16 +143,16 @@ public class GraphDriver	{
 					actors = (String [])in.readLine().trim().split ( "," );
 				}
 				catch ( IOException exception )	{
-					System.out.println ( "bailing from:" );
+					System.out.println ( "bailing from bfs:" );
 					exception.printStackTrace();
-					break;
 				}
 				if ( actors.length != 2 )	{
 					System.out.println ( "Enter two actors only!" );
 				}
-				//put in real bfs here for two states
-				ArrayList path = mygraph.bfs ( actors[0].trim(), actors[1].trim() );
-				printPath ( path );
+				else	{
+					ArrayList path = mygraph.bfs ( actors[0].trim(), actors[1].trim() );
+					printPath ( path );
+				}
 			}
 			else if ( command.equals ( "add" ) )	{
 				System.out.print ( "read from file> " );
@@ -159,9 +161,8 @@ public class GraphDriver	{
 					filename = (String [])in.readLine().trim().split ( " " );
 				}
 				catch ( IOException exception )	{
-					System.out.println ( "bailing from:" );
+					System.out.println ( "bailing from add:" );
 					exception.printStackTrace();
-					break;
 				}
 				for ( int q = 0; q < filename.length; q++ )	{
 					readFile ( filename[q], q, filename.length );
@@ -173,6 +174,9 @@ public class GraphDriver	{
 			}
 			else if ( command.equals ( "quit" ) )	{
 				break;
+			}
+			else	{
+				System.out.println ( "Unknown Command: '" + command + "'" );
 			}
 			System.out.println();
 		}
